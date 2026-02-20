@@ -1,0 +1,68 @@
+import { Badge } from "@/types";
+
+export const badgeDefinitions: Badge[] = [
+  {
+    id: "first-lesson",
+    name: "First Steps",
+    description: "Complete your first lesson",
+    icon: "🎯",
+    criteria_type: "lessons_completed",
+    criteria_value: 1,
+  },
+  {
+    id: "five-lessons",
+    name: "Knowledge Seeker",
+    description: "Complete 5 lessons",
+    icon: "📚",
+    criteria_type: "lessons_completed",
+    criteria_value: 5,
+  },
+  {
+    id: "first-quiz",
+    name: "Quiz Starter",
+    description: "Complete your first quiz",
+    icon: "✏️",
+    criteria_type: "quizzes_completed",
+    criteria_value: 1,
+  },
+  {
+    id: "quiz-master",
+    name: "Quiz Master",
+    description: "Score 100% on any quiz",
+    icon: "🏆",
+    criteria_type: "perfect_quiz",
+    criteria_value: 1,
+  },
+  {
+    id: "halfway",
+    name: "Halfway There",
+    description: "Complete 50% of your roadmap",
+    icon: "⭐",
+    criteria_type: "roadmap_progress",
+    criteria_value: 50,
+  },
+  {
+    id: "roadmap-complete",
+    name: "Road Scholar",
+    description: "Complete your entire roadmap",
+    icon: "🎓",
+    criteria_type: "roadmap_progress",
+    criteria_value: 100,
+  },
+  {
+    id: "first-interview",
+    name: "Interview Ready",
+    description: "Complete your first mock interview",
+    icon: "💼",
+    criteria_type: "interviews_completed",
+    criteria_value: 1,
+  },
+  {
+    id: "streak-3",
+    name: "On Fire",
+    description: "Study 3 days in a row",
+    icon: "🔥",
+    criteria_type: "study_streak",
+    criteria_value: 3,
+  },
+];
