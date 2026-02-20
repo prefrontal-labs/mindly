@@ -79,13 +79,14 @@ function GenerateRoadmapContent() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) throw new Error(error.message || JSON.stringify(error));
 
       toast.success("Roadmap generated! Let's start learning!");
       router.push(`/roadmap/${data.id}`);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to generate roadmap. Please try again.");
+    } catch (err: unknown) {
+      console.error("Roadmap generation failed:", err);
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Failed to generate roadmap: ${message}`);
       setGenerating(false);
     }
   }
