@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getCertification } from "@/lib/certifications";
 import Navbar from "@/components/layout/navbar";
+import ProjectSelector from "@/components/projects/project-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,22 +14,23 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2, BookOpen, MessageSquare, Send, CheckCircle,
   ArrowLeft, ArrowRight, Target, X, Lightbulb, Layers,
-  Zap, ChevronLeft, ChevronRight,
+  Zap, ChevronLeft, ChevronRight, Code2,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import type { Roadmap, RoadmapSection, ChatMessage } from "@/types";
 import { toast } from "sonner";
 
 interface Concept { title: string; explanation: string; key_points: string[]; real_example: string; exam_tip: string; }
-interface Scenario { title: string; situation: string; question: string; solution: string; aws_services: string[]; }
+interface Scenario { title: string; situation: string; question: string; options: string[]; correct_index: number; explanation: string; key_concepts: string[]; }
 interface Flashcard { front: string; back: string; }
-interface LessonData { overview: string; concepts: Concept[]; scenario: Scenario | null; flashcards: Flashcard[]; }
-type Tab = "learn" | "flashcards" | "scenario" | "quiz";
+interface LessonData { overview: string; concepts: Concept[]; scenarios: Scenario[]; flashcards: Flashcard[]; }
+type Tab = "learn" | "flashcards" | "scenario" | "projects" | "quiz";
 
 const milestoneItems: { id: Tab; label: string; icon: typeof BookOpen }[] = [
   { id: "learn", label: "Learn", icon: BookOpen },
   { id: "flashcards", label: "Flashcards", icon: Layers },
   { id: "scenario", label: "Scenario", icon: Lightbulb },
+  { id: "projects", label: "Projects", icon: Code2 },
   { id: "quiz", label: "Quiz", icon: Target },
 ];
 
@@ -45,9 +47,11 @@ export default function LearnPage() {
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+  const [currentConcept, setCurrentConcept] = useState(0);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
   const [currentFlashcard, setCurrentFlashcard] = useState(0);
-  const [showSolution, setShowSolution] = useState(false);
+  const [scenarioAnswers, setScenarioAnswers] = useState<{ [key: number]: number }>({});
+  const [scenarioSubmitted, setScenarioSubmitted] = useState<{ [key: number]: boolean }>({});
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -86,7 +90,7 @@ export default function LearnPage() {
         body: JSON.stringify({
           sectionTitle: title,
           topics,
-          certification: c?.name || "AWS Solutions Architect Associate",
+          certification: c?.name || "Agentic AI Fundamentals",
           roadmapId: rm.id,
           sectionIndex,
           topicFilter: topicFilter || undefined,
@@ -153,7 +157,7 @@ export default function LearnPage() {
 
   return (
     <><Navbar />
-      <div className="h-screen pt-14 flex flex-col bg-[#FAFBFF]">
+      <div className="h-screen pt-14 flex flex-col bg-[#f0f9ff]">
         {/* Top bar */}
         <div className="border-b border-border bg-white px-6 py-3">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -203,33 +207,47 @@ export default function LearnPage() {
                     <div className="flex items-center gap-2 text-indigo-700 font-semibold text-sm mb-2"><Zap className="h-4 w-4" />Why this matters</div>
                     <p className="text-sm text-indigo-900 leading-relaxed">{lesson.overview}</p>
                   </div>
-                  <div className={`grid gap-4 ${lesson.concepts?.length === 1 ? "md:grid-cols-1 max-w-2xl mx-auto" : "md:grid-cols-2"}`}>
-                    {lesson.concepts?.map((concept, i) => (
-                      <Card key={i} className="concept-card border-border overflow-hidden">
-                        <CardContent className="p-5">
-                          <h3 className="font-semibold text-base mb-2">{concept.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{concept.explanation}</p>
-                          <div className="space-y-2 mb-3">
-                            {concept.key_points?.map((pt, j) => (
+
+                  {lesson.concepts && lesson.concepts.length > 0 && (
+                    <div className="max-w-2xl mx-auto">
+                      <div className="text-center mb-4">
+                        <p className="text-sm text-muted-foreground">
+                          Concept {currentConcept + 1} of {lesson.concepts.length}
+                        </p>
+                      </div>
+
+                      <Card className="concept-card border-border overflow-hidden mb-4">
+                        <CardContent className="p-6">
+                          <h3 className="font-semibold text-lg mb-3">{lesson.concepts[currentConcept].title}</h3>
+                          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{lesson.concepts[currentConcept].explanation}</p>
+                          <div className="space-y-2 mb-4">
+                            {lesson.concepts[currentConcept].key_points?.map((pt, j) => (
                               <div key={j} className="flex items-start gap-2 text-sm"><CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" /><span>{pt}</span></div>
                             ))}
                           </div>
-                          {concept.real_example && (
-                            <div className="bg-amber-50 rounded-lg p-3 text-sm mb-3">
-                              <div className="flex items-center gap-1 text-amber-700 font-medium text-xs mb-1"><Lightbulb className="h-3 w-3" />Real Example</div>
-                              <p className="text-amber-900 text-xs leading-relaxed">{concept.real_example}</p>
+                          {lesson.concepts[currentConcept].real_example && (
+                            <div className="bg-amber-50 rounded-lg p-4 text-sm mb-4">
+                              <div className="flex items-center gap-1 text-amber-700 font-medium text-xs mb-2"><Lightbulb className="h-3 w-3" />Real Example</div>
+                              <p className="text-amber-900 text-xs leading-relaxed">{lesson.concepts[currentConcept].real_example}</p>
                             </div>
                           )}
-                          {concept.exam_tip && (
-                            <div className="bg-violet-50 rounded-lg p-3">
-                              <div className="flex items-center gap-1 text-violet-700 font-medium text-xs mb-1"><Target className="h-3 w-3" />Exam Tip</div>
-                              <p className="text-violet-900 text-xs leading-relaxed">{concept.exam_tip}</p>
+                          {lesson.concepts[currentConcept].exam_tip && (
+                            <div className="bg-violet-50 rounded-lg p-4">
+                              <div className="flex items-center gap-1 text-violet-700 font-medium text-xs mb-2"><Target className="h-3 w-3" />Pro Tip</div>
+                              <p className="text-violet-900 text-xs leading-relaxed">{lesson.concepts[currentConcept].exam_tip}</p>
                             </div>
                           )}
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
+
+                      <div className="flex items-center justify-center gap-4 mb-6">
+                        <Button variant="outline" size="sm" disabled={currentConcept === 0} onClick={() => setCurrentConcept((c) => c - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                        <div className="flex gap-1.5">{lesson.concepts.map((_, i) => (<div key={i} className={`h-2 w-2 rounded-full transition-colors cursor-pointer ${i === currentConcept ? "bg-primary" : "bg-gray-200"}`} onClick={() => setCurrentConcept(i)} />))}</div>
+                        <Button variant="outline" size="sm" disabled={currentConcept === lesson.concepts.length - 1} onClick={() => setCurrentConcept((c) => c + 1)}><ChevronRight className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="text-center pt-4"><Button variant="outline" onClick={() => setActiveTab("flashcards")}>Continue to Flashcards <ArrowRight className="h-4 w-4 ml-2" /></Button></div>
                 </div>
               )}
@@ -260,28 +278,102 @@ export default function LearnPage() {
                 </div>
               )}
 
-              {/* SCENARIO */}
-              {activeTab === "scenario" && lesson?.scenario && (
+              {/* SCENARIOS */}
+              {activeTab === "scenario" && lesson?.scenarios && lesson.scenarios.length > 0 && (
                 <div className="max-w-2xl mx-auto space-y-5">
-                  <div className="text-center mb-2"><h2 className="text-lg font-semibold">Real-World Scenario</h2><p className="text-sm text-muted-foreground">Think through this before revealing the answer</p></div>
-                  <Card className="border-border overflow-hidden">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 text-amber-600 font-semibold text-sm mb-3"><Lightbulb className="h-4 w-4" />{lesson.scenario.title}</div>
-                      <p className="text-sm leading-relaxed mb-4">{lesson.scenario.situation}</p>
-                      <div className="bg-amber-50 rounded-lg p-4 mb-4"><p className="text-sm font-semibold text-amber-800">{lesson.scenario.question}</p></div>
-                      <div className="flex flex-wrap gap-2 mb-4">{lesson.scenario.aws_services?.map((svc, i) => (<Badge key={i} variant="secondary" className="bg-indigo-50 text-indigo-700">{svc}</Badge>))}</div>
-                      {!showSolution ? (
-                        <Button onClick={() => setShowSolution(true)} className="w-full" variant="outline">Reveal Solution</Button>
-                      ) : (
-                        <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
-                          <div className="flex items-center gap-2 text-emerald-700 font-medium text-sm mb-2"><CheckCircle className="h-4 w-4" />Solution</div>
-                          <p className="text-sm text-emerald-900 leading-relaxed">{lesson.scenario.solution}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                  <div className="text-center pt-2"><Button variant="outline" onClick={() => router.push(`/quiz/${roadmapId}/${sectionIndex}`)}>Take the Quiz <Target className="h-4 w-4 ml-2" /></Button></div>
+                  <div className="text-center mb-2"><h2 className="text-lg font-semibold">Real-World Scenarios</h2><p className="text-sm text-muted-foreground">Test your understanding with multiple-choice questions</p></div>
+                  {lesson.scenarios.map((scenario, idx) => {
+                    const selectedAnswer = scenarioAnswers[idx];
+                    const isSubmitted = scenarioSubmitted[idx];
+                    const isCorrect = selectedAnswer === scenario.correct_index;
+
+                    return (
+                      <Card key={idx} className="border-border overflow-hidden">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-2 text-amber-600 font-semibold text-sm mb-3">
+                            <Lightbulb className="h-4 w-4" />
+                            Scenario {idx + 1}: {scenario.title}
+                          </div>
+                          <p className="text-sm leading-relaxed mb-4">{scenario.situation}</p>
+                          <div className="bg-amber-50 rounded-lg p-4 mb-4">
+                            <p className="text-sm font-semibold text-amber-800">{scenario.question}</p>
+                          </div>
+
+                          <div className="space-y-2 mb-4">
+                            {scenario.options.map((option, optIdx) => (
+                              <button
+                                key={optIdx}
+                                onClick={() => !isSubmitted && setScenarioAnswers({ ...scenarioAnswers, [idx]: optIdx })}
+                                disabled={isSubmitted}
+                                className={`w-full text-left p-3 rounded-lg border transition-all ${
+                                  isSubmitted
+                                    ? optIdx === scenario.correct_index
+                                      ? "border-emerald-500 bg-emerald-50"
+                                      : optIdx === selectedAnswer
+                                      ? "border-red-500 bg-red-50"
+                                      : "border-border bg-background opacity-50"
+                                    : selectedAnswer === optIdx
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border bg-background hover:border-primary/50"
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+                                    isSubmitted && optIdx === scenario.correct_index
+                                      ? "border-emerald-500 bg-emerald-500"
+                                      : isSubmitted && optIdx === selectedAnswer
+                                      ? "border-red-500 bg-red-500"
+                                      : selectedAnswer === optIdx
+                                      ? "border-primary bg-primary"
+                                      : "border-border"
+                                  }`}>
+                                    {((isSubmitted && optIdx === scenario.correct_index) || (isSubmitted && optIdx === selectedAnswer)) && (
+                                      <CheckCircle className="h-3 w-3 text-white" />
+                                    )}
+                                  </div>
+                                  <span className="text-sm">{option}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+
+                          {!isSubmitted ? (
+                            <Button
+                              onClick={() => setScenarioSubmitted({ ...scenarioSubmitted, [idx]: true })}
+                              disabled={selectedAnswer === undefined}
+                              className="w-full"
+                            >
+                              Submit Answer
+                            </Button>
+                          ) : (
+                            <div className={`rounded-lg p-4 border ${isCorrect ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"}`}>
+                              <div className="flex items-center gap-2 font-medium text-sm mb-2">
+                                <CheckCircle className={`h-4 w-4 ${isCorrect ? "text-emerald-700" : "text-red-700"}`} />
+                                <span className={isCorrect ? "text-emerald-700" : "text-red-700"}>
+                                  {isCorrect ? "Correct!" : "Incorrect"}
+                                </span>
+                              </div>
+                              <p className={`text-sm leading-relaxed ${isCorrect ? "text-emerald-900" : "text-red-900"}`}>{scenario.explanation}</p>
+                              {scenario.key_concepts && scenario.key_concepts.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                  {scenario.key_concepts.map((concept, i) => (
+                                    <Badge key={i} variant="secondary" className="bg-indigo-50 text-indigo-700">{concept}</Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                  <div className="text-center pt-2"><Button variant="outline" onClick={() => setActiveTab("projects")}>Continue to Projects <ArrowRight className="h-4 w-4 ml-2" /></Button></div>
                 </div>
+              )}
+
+              {/* PROJECTS */}
+              {activeTab === "projects" && (
+                <ProjectSelector roadmapId={roadmapId} sectionIndex={sectionIndex} />
               )}
             </div>
           </div>
