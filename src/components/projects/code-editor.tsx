@@ -55,9 +55,6 @@ export default function CodeEditor({ code, language, onChange, readOnly = false 
         folding: true,
         renderWhitespace: "selection",
         bracketPairColorization: { enabled: true },
-        suggest: {
-          enabled: !readOnly,
-        },
         quickSuggestions: !readOnly,
       }}
     />
