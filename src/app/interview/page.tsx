@@ -40,7 +40,7 @@ export default function InterviewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [{ role: "user", content: "Hi, I'm ready to start the interview. Please begin." }],
-          certification: "AWS Solutions Architect Associate",
+          certification: "Agentic AI Fundamentals",
           sessionType: "interview",
         }),
       });
@@ -69,7 +69,7 @@ export default function InterviewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: newMessages,
-          certification: "AWS Solutions Architect Associate",
+          certification: "Agentic AI Fundamentals",
           sessionType: "interview",
         }),
       });
@@ -103,8 +103,8 @@ export default function InterviewPage() {
               <span className="gradient-text">Interview Preparation</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Practice with our AI interviewer who will ask you real AWS
-              Solutions Architect interview questions and provide feedback on
+              Practice with our AI interviewer who will ask you real Agentic AI
+              and Generative AI questions and provide feedback on
               your answers.
             </p>
           </div>
@@ -116,7 +116,7 @@ export default function InterviewPage() {
                   <div className="text-3xl mb-2">🎯</div>
                   <h3 className="font-semibold mb-1">Scenario Questions</h3>
                   <p className="text-sm text-muted-foreground">
-                    Real-world AWS architecture scenarios
+                    Real-world AI system design scenarios
                   </p>
                 </div>
                 <div className="text-center">
@@ -150,8 +150,8 @@ export default function InterviewPage() {
 
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              The interview will cover 5-7 questions across AWS SAA domains including
-              compute, storage, networking, security, and architecture design.
+              The interview will cover 5-7 questions across AI topics including
+              LLMs, agent architectures, RAG systems, prompt engineering, and production deployment.
             </p>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function InterviewPage() {
               Mock Interview Session
             </h1>
             <Badge variant="secondary" className="mt-1">
-              AWS Solutions Architect Associate
+              Agentic AI Fundamentals
             </Badge>
           </div>
           <Button variant="outline" size="sm" onClick={resetInterview}>

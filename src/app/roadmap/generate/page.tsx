@@ -15,26 +15,26 @@ const experienceLevels = [
   {
     id: "beginner",
     label: "Beginner",
-    description: "New to cloud computing, minimal AWS experience",
+    description: "New to AI, learning fundamentals and basic concepts",
     icon: "🌱",
   },
   {
     id: "intermediate",
     label: "Intermediate",
-    description: "Some AWS experience, familiar with basic services",
+    description: "Some AI experience, familiar with LLMs and basic applications",
     icon: "🌿",
   },
   {
     id: "advanced",
     label: "Advanced",
-    description: "Working with AWS professionally, need exam-specific prep",
+    description: "Working with AI professionally, building production systems",
     icon: "🌳",
   },
 ];
 
 function GenerateRoadmapContent() {
   const searchParams = useSearchParams();
-  const certId = searchParams.get("cert") || "aws-saa-c03";
+  const certId = searchParams.get("cert") || "agentic-ai-fundamentals";
   const cert = getCertification(certId);
   const [selectedLevel, setSelectedLevel] = useState<string>("");
   const [generating, setGenerating] = useState(false);
@@ -57,7 +57,7 @@ function GenerateRoadmapContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          certification: cert?.name || "AWS Solutions Architect Associate",
+          certification: cert?.name || "Agentic AI Fundamentals",
           certificationId: certId,
           experienceLevel: selectedLevel,
         }),
@@ -72,7 +72,7 @@ function GenerateRoadmapContent() {
         .insert({
           user_id: user.id,
           certification_id: certId,
-          title: `${cert?.name || "AWS SAA"} - ${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)} Path`,
+          title: `${cert?.name || "AI Course"} - ${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)} Path`,
           sections: roadmap,
           experience_level: selectedLevel,
         })

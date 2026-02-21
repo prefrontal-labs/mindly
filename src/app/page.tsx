@@ -48,10 +48,10 @@ export default function LandingPage() {
               Learn by doing, not just reading
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-5 leading-tight text-foreground">
-              The smartest way to<br /><span className="gradient-text">ace cloud certs</span>
+              The smartest way to<br /><span className="gradient-text">master AI skills</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-              AI-powered flashcards, interactive scenarios, and real-world practice. Not another wall of text.
+              AI-powered learning paths for Agentic AI & Generative AI. Interactive scenarios and real-world practice.
             </p>
             <Link href="/signup">
               <Button size="lg" className="text-base px-8 py-6 animate-pulse-glow">
@@ -60,9 +60,9 @@ export default function LandingPage() {
             </Link>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-16 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">☁️</div><div className="text-sm font-semibold">AWS SAA</div><div className="text-xs text-muted-foreground mt-1">12 chapters</div></div>
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">🌐</div><div className="text-sm font-semibold">GCP ACE</div><div className="text-xs text-muted-foreground mt-1">Coming soon</div></div>
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">🔷</div><div className="text-sm font-semibold">Azure AZ-900</div><div className="text-xs text-muted-foreground mt-1">Coming soon</div></div>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">🤖</div><div className="text-sm font-semibold">Agentic AI</div><div className="text-xs text-muted-foreground mt-1">12 chapters</div></div>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">✨</div><div className="text-sm font-semibold">Generative AI</div><div className="text-xs text-muted-foreground mt-1">10 chapters</div></div>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">🚀</div><div className="text-sm font-semibold">AI Agents</div><div className="text-xs text-muted-foreground mt-1">Advanced</div></div>
           </motion.div>
         </div>
       </section>
@@ -72,7 +72,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-12">Learn in <span className="gradient-text">4 simple steps</span></h2>
           <div className="grid grid-cols-4 gap-3">
-            {[{ num: "1", title: "Pick a cert", icon: "🎯", bg: "bg-indigo-50" }, { num: "2", title: "AI builds your path", icon: "🗺️", bg: "bg-violet-50" }, { num: "3", title: "Learn & practice", icon: "⚡", bg: "bg-amber-50" }, { num: "4", title: "Get certified", icon: "🏆", bg: "bg-emerald-50" }].map((step) => (
+            {[{ num: "1", title: "Pick a course", icon: "🎯", bg: "bg-indigo-50" }, { num: "2", title: "AI builds your path", icon: "🗺️", bg: "bg-violet-50" }, { num: "3", title: "Learn & practice", icon: "⚡", bg: "bg-amber-50" }, { num: "4", title: "Master AI skills", icon: "🏆", bg: "bg-emerald-50" }].map((step) => (
               <motion.div key={step.num} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: parseInt(step.num) * 0.1 }} className={`${step.bg} rounded-2xl p-5 text-center`}>
                 <div className="text-3xl mb-3">{step.icon}</div>
                 <div className="text-sm font-semibold text-foreground">{step.title}</div>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -14,9 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mindly - Master Cloud Certifications with AI",
+  title: "Mindly - Master AI Skills with Interactive Learning",
   description:
-    "Learn AWS, GCP, and Azure certifications the fun way with AI-powered roadmaps, interactive lessons, quizzes, and mock interviews.",
+    "Learn Agentic AI and Generative AI through AI-powered roadmaps, interactive lessons, quizzes, and mock interviews.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -27,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="light" style={{ colorScheme: "light" }}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#FAFBFF] text-[#1a1a2e]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f9ff] text-[#0c4a6e]`}
       >
         {children}
         <Toaster />

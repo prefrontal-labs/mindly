@@ -47,28 +47,28 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
-/* Light, clean, vibrant theme — force light color-scheme */
+/* Light, clean, blue gradient theme — force light color-scheme */
 :root {
   color-scheme: light;
   --radius: 0.75rem;
-  --background: #FAFBFF;
-  --foreground: #1a1a2e;
+  --background: #f0f9ff;
+  --foreground: #0c4a6e;
   --card: #ffffff;
-  --card-foreground: #1a1a2e;
+  --card-foreground: #0c4a6e;
   --popover: #ffffff;
-  --popover-foreground: #1a1a2e;
-  --primary: #6366f1;
+  --popover-foreground: #0c4a6e;
+  --primary: #0ea5e9;
   --primary-foreground: #ffffff;
-  --secondary: #f0f0ff;
-  --secondary-foreground: #4338ca;
-  --muted: #f5f5ff;
-  --muted-foreground: #6b7280;
-  --accent: #ede9fe;
-  --accent-foreground: #4338ca;
+  --secondary: #e0f2fe;
+  --secondary-foreground: #0369a1;
+  --muted: #f0f9ff;
+  --muted-foreground: #64748b;
+  --accent: #bae6fd;
+  --accent-foreground: #0369a1;
   --destructive: #ef4444;
-  --border: #e5e7eb;
-  --input: #e5e7eb;
-  --ring: #6366f1;
+  --border: #bae6fd;
+  --input: #e0f2fe;
+  --ring: #0ea5e9;
   --chart-1: #6366f1;
   --chart-2: #10b981;
   --chart-3: #f59e0b;
@@ -90,14 +90,14 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #FAFBFF;
-    color: #1a1a2e;
+    background-color: #f0f9ff;
+    color: #0c4a6e;
   }
 }
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+  background: linear-gradient(135deg, #0ea5e9, #06b6d4, #3b82f6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -110,12 +110,12 @@
   background-clip: text;
 }
 
-/* Glass effect (light version) */
+/* Glass effect (blue tinted version) */
 .glass {
-  background: rgba(250, 251, 255, 0.92);
+  background: rgba(240, 249, 255, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(14, 165, 233, 0.12);
 }
 
 /* Flashcard flip */

@@ -141,7 +141,7 @@ export default function RoadmapPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#FAFBFF] pt-20 pb-16">
+      <div className="min-h-screen bg-[#f0f9ff] pt-20 pb-16">
         <div className="max-w-5xl mx-auto px-6">
           {/* Header */}
           <div className="mb-10">

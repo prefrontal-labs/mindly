@@ -22,11 +22,11 @@ export async function POST(request: Request) {
 
     const systemPrompt =
       sessionType === "interview"
-        ? getInterviewSystemPrompt(certification || "AWS Solutions Architect Associate")
+        ? getInterviewSystemPrompt(certification || "Agentic AI Fundamentals")
         : getTutorSystemPrompt(
             sectionTitle || "General",
             topics || [],
-            certification || "AWS Solutions Architect Associate"
+            certification || "Agentic AI Fundamentals"
           );
 
     const completion = await groq.chat.completions.create({

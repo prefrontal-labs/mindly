@@ -73,7 +73,7 @@ export default function QuizPage() {
         body: JSON.stringify({
           sectionTitle: sec.title,
           topics: sec.topics,
-          certification: c?.name || "AWS Solutions Architect Associate",
+          certification: c?.name || "Agentic AI Fundamentals",
           difficulty: "medium",
           roadmapId: rm.id,
           sectionIndex,
