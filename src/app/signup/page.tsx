@@ -61,8 +61,8 @@ export default function SignupPage() {
       }
 
       // Profile is automatically created by database trigger with all metadata
-      toast.success("Account created! Check your email to confirm.");
-      router.push("/dashboard");
+      // Don't redirect to dashboard — user must confirm email first
+      router.push("/login?message=check-email");
     } catch (err) {
       console.error("Signup error:", err);
       toast.error("Failed to create account. Please try again.");

@@ -19,6 +19,8 @@ import {
   ArrowRight,
   CheckCircle,
   Trophy,
+  BookOpen,
+  Code2,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Roadmap, Project, ProjectSubmission, CodeFeedback } from "@/types";
@@ -32,6 +34,7 @@ export default function ProjectWorkspacePage() {
   const sectionIndex = parseInt(params.sectionIndex as string);
   const difficulty = params.difficulty as "easy" | "medium" | "hard";
 
+  const [mobileTab, setMobileTab] = useState<"steps" | "code">("steps");
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [code, setCode] = useState("");
@@ -241,95 +244,79 @@ export default function ProjectWorkspacePage() {
       <Navbar />
       <div className="h-screen pt-14 flex flex-col bg-[#f0f9ff]">
         {/* Top bar */}
-        <div className="border-b border-border bg-white px-6 py-3 shrink-0">
+        <div className="border-b border-border bg-white px-4 sm:px-6 py-3 shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex}?tab=projects`)}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <Button variant="ghost" size="sm" className="shrink-0 px-2"
+                onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex}?tab=projects`)}>
+                <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div>
-                <h1 className="text-lg font-bold">{project.title}</h1>
-                <p className="text-xs text-muted-foreground">{project.description}</p>
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-base font-bold truncate">{project.title}</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block truncate">{project.description}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge
-                variant="secondary"
-                className={`
-                  ${difficulty === "easy" ? "bg-emerald-100 text-emerald-700" : ""}
-                  ${difficulty === "medium" ? "bg-amber-100 text-amber-700" : ""}
-                  ${difficulty === "hard" ? "bg-red-100 text-red-700" : ""}
-                `}
-              >
-                {difficulty.toUpperCase()}
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant="secondary" className={`text-xs ${difficulty === "easy" ? "bg-emerald-100 text-emerald-700" : difficulty === "medium" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
               </Badge>
-              {saving ? (
-                <Badge variant="outline" className="gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Saving...
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="gap-1">
-                  <Save className="h-3 w-3" />
-                  Saved
-                </Badge>
-              )}
+              <Badge variant="outline" className="gap-1 text-xs">
+                {saving ? <><Loader2 className="h-3 w-3 animate-spin" />Saving</> : <><Save className="h-3 w-3" />Saved</>}
+              </Badge>
             </div>
+          </div>
+
+          {/* Mobile tab switcher */}
+          <div className="flex gap-1 mt-2 sm:hidden">
+            <button onClick={() => setMobileTab("steps")}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all ${mobileTab === "steps" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              <BookOpen className="h-3.5 w-3.5" />Steps
+            </button>
+            <button onClick={() => setMobileTab("code")}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all ${mobileTab === "code" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              <Code2 className="h-3.5 w-3.5" />Editor
+            </button>
           </div>
         </div>
 
-        {/* Split screen workspace */}
+        {/* Workspace — split on desktop, tabbed on mobile */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left: Step Guide */}
-          <div className="w-1/3 border-r border-border bg-white overflow-hidden">
+          {/* Left: Step Guide (always visible on desktop, conditional on mobile) */}
+          <div className={`${mobileTab === "steps" ? "flex" : "hidden"} sm:flex w-full sm:w-1/3 border-r border-border bg-white overflow-hidden flex-col`}>
             <StepGuide
               steps={project.steps}
               currentStep={currentStep}
-              onStepChange={setCurrentStep}
+              onStepChange={(i) => { setCurrentStep(i); setMobileTab("code"); }}
             />
           </div>
 
-          {/* Right: Code Editor */}
-          <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Right: Code Editor (always visible on desktop, conditional on mobile) */}
+          <div className={`${mobileTab === "code" ? "flex" : "hidden"} sm:flex flex-1 flex-col overflow-hidden`}>
             <div className="flex-1 overflow-hidden">
-              <CodeEditor
-                code={code}
-                language={project.language}
-                onChange={setCode}
-              />
+              <CodeEditor code={code} language={project.language} onChange={setCode} />
             </div>
 
             {/* Feedback panel */}
             {currentFeedback && (
-              <div className="p-4 border-t border-border bg-white max-h-48 overflow-y-auto">
+              <div className="p-3 sm:p-4 border-t border-border bg-white max-h-48 overflow-y-auto">
                 <Card className="border-primary/20 bg-primary/5">
-                  <CardContent className="p-4">
+                  <CardContent className="p-3 sm:p-4">
                     <div className="flex items-start gap-2 mb-2">
-                      <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <h3 className="font-semibold text-sm mb-1">AI Feedback</h3>
-                        <p className="text-sm">{currentFeedback.overall}</p>
+                        <p className="text-xs sm:text-sm">{currentFeedback.overall}</p>
                         {currentFeedback.score !== undefined && (
-                          <Badge className="mt-2 bg-primary">
-                            Score: {currentFeedback.score}/100
-                          </Badge>
+                          <Badge className="mt-2 bg-primary text-xs">Score: {currentFeedback.score}/100</Badge>
                         )}
                       </div>
                     </div>
                     {currentFeedback.suggestions.length > 0 && (
-                      <div className="mt-3 text-sm">
+                      <div className="mt-2 text-xs sm:text-sm">
                         <p className="font-medium mb-1">Suggestions:</p>
                         <ul className="space-y-1">
                           {currentFeedback.suggestions.map((s, i) => (
-                            <li key={i} className="flex gap-2">
-                              <span>•</span>
-                              <span>{s}</span>
-                            </li>
+                            <li key={i} className="flex gap-2"><span>•</span><span>{s}</span></li>
                           ))}
                         </ul>
                       </div>
@@ -340,40 +327,14 @@ export default function ProjectWorkspacePage() {
             )}
 
             {/* Bottom actions */}
-            <div className="p-4 border-t border-border bg-white shrink-0 flex gap-3">
-              <Button
-                onClick={evaluateCode}
-                disabled={evaluating || !code}
-                variant="outline"
-                className="flex-1"
-              >
-                {evaluating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Evaluating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Get AI Feedback
-                  </>
-                )}
+            <div className="p-3 sm:p-4 border-t border-border bg-white shrink-0 flex gap-2 sm:gap-3">
+              <Button onClick={evaluateCode} disabled={evaluating || !code} variant="outline" className="flex-1 text-xs sm:text-sm">
+                {evaluating ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" />Evaluating...</> : <><Sparkles className="h-4 w-4 mr-1.5" />AI Feedback</>}
               </Button>
-              <Button
-                onClick={handleNextStep}
-                className="flex-1 bg-primary hover:bg-primary/90"
-              >
-                {currentStep < project.steps.length - 1 ? (
-                  <>
-                    Next Step
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </>
-                ) : (
-                  <>
-                    Complete Project
-                    <Trophy className="h-4 w-4 ml-2" />
-                  </>
-                )}
+              <Button onClick={handleNextStep} className="flex-1 bg-primary hover:bg-primary/90 text-xs sm:text-sm">
+                {currentStep < project.steps.length - 1
+                  ? <><span>Next Step</span><ArrowRight className="h-4 w-4 ml-1.5" /></>
+                  : <><span>Complete</span><Trophy className="h-4 w-4 ml-1.5" /></>}
               </Button>
             </div>
           </div>

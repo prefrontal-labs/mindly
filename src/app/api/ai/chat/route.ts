@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import groq, { AI_MODEL } from "@/lib/groq";
+import groq, { FAST_MODEL, SMART_MODEL } from "@/lib/groq";
 import { getTutorSystemPrompt } from "@/lib/prompts/tutor";
 import { getInterviewSystemPrompt } from "@/lib/prompts/interview";
 import type { ChatMessage } from "@/types";
@@ -29,8 +29,11 @@ export async function POST(request: Request) {
             certification || "Agentic AI Fundamentals"
           );
 
+    // Interview needs deeper reasoning; tutor chat benefits from speed
+    const model = sessionType === "interview" ? SMART_MODEL : FAST_MODEL;
+
     const completion = await groq.chat.completions.create({
-      model: AI_MODEL,
+      model,
       messages: [
         { role: "system", content: systemPrompt },
         ...messages.map((m) => ({

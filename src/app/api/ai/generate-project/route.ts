@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import groq, { AI_MODEL } from "@/lib/groq";
+import groq, { SMART_MODEL, extractJsonObject } from "@/lib/groq";
 import { generateProjectPrompt } from "@/lib/prompts/project";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     );
 
     const completion = await groq.chat.completions.create({
-      model: AI_MODEL,
+      model: SMART_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 8000,
@@ -46,8 +46,7 @@ export async function POST(request: Request) {
 
     let project;
     try {
-      const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      project = JSON.parse(jsonStr);
+      project = extractJsonObject(content);
     } catch {
       project = getDefaultProject(difficulty);
     }

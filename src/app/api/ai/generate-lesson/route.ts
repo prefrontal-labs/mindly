@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import groq, { AI_MODEL } from "@/lib/groq";
+import groq, { SMART_MODEL, extractJsonObject } from "@/lib/groq";
 import { generateLessonPrompt } from "@/lib/prompts/lesson";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,18 +32,17 @@ export async function POST(request: Request) {
     const prompt = generateLessonPrompt(sectionTitle, topics, certification);
 
     const completion = await groq.chat.completions.create({
-      model: AI_MODEL,
+      model: SMART_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 6000,
     });
 
     const content = completion.choices[0]?.message?.content || "{}";
 
     let lesson;
     try {
-      const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      lesson = JSON.parse(jsonStr);
+      lesson = extractJsonObject(content);
     } catch {
       lesson = {
         overview: "Failed to parse lesson content. Please try again.",
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
     }
 
     // Save to cache
-    if (roadmapId != null && sectionIndex != null && lesson.concepts?.length > 0) {
+    if (roadmapId != null && sectionIndex != null && (lesson as { concepts?: unknown[] }).concepts?.length) {
       const supabase = await createClient();
       await supabase.from("ai_content_cache").upsert(
         { roadmap_id: roadmapId, section_index: sectionIndex, content_type: contentType, content: lesson },

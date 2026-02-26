@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import groq, { AI_MODEL } from "@/lib/groq";
+import groq, { SMART_MODEL, extractJsonArray } from "@/lib/groq";
 import { generateRoadmapPrompt } from "@/lib/prompts/roadmap";
 
 export async function POST(request: Request) {
@@ -9,21 +9,18 @@ export async function POST(request: Request) {
     const prompt = generateRoadmapPrompt(certification, experienceLevel);
 
     const completion = await groq.chat.completions.create({
-      model: AI_MODEL,
+      model: SMART_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 5000,
     });
 
     const content = completion.choices[0]?.message?.content || "[]";
 
-    // Parse JSON from the response, handling potential markdown wrapping
     let roadmap;
     try {
-      const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      roadmap = JSON.parse(jsonStr);
+      roadmap = extractJsonArray(content);
     } catch {
-      // If parsing fails, return a default roadmap
       roadmap = getDefaultRoadmap(experienceLevel);
     }
 

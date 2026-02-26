@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import groq, { AI_MODEL } from "@/lib/groq";
+import groq, { SMART_MODEL, extractJsonObject } from "@/lib/groq";
 import { evaluateCodePrompt } from "@/lib/prompts/project";
 import type { CodeFeedback } from "@/types";
 
@@ -13,9 +13,9 @@ export async function POST(request: Request) {
     const prompt = evaluateCodePrompt(code, solutionCode, step, language);
 
     const completion = await groq.chat.completions.create({
-      model: AI_MODEL,
+      model: SMART_MODEL,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.4, // Lower temperature for more consistent evaluation
+      temperature: 0.4,
       max_tokens: 3000,
     });
 
@@ -23,8 +23,7 @@ export async function POST(request: Request) {
 
     let feedback: CodeFeedback;
     try {
-      const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      feedback = JSON.parse(jsonStr);
+      feedback = extractJsonObject(content) as unknown as CodeFeedback;
     } catch {
       // Fallback feedback if parsing fails
       feedback = {

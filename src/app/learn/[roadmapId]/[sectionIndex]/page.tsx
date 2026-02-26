@@ -159,25 +159,34 @@ export default function LearnPage() {
     <><Navbar />
       <div className="h-screen pt-14 flex flex-col bg-[#f0f9ff]">
         {/* Top bar */}
-        <div className="border-b border-border bg-white px-6 py-3">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => router.push(`/roadmap/${roadmapId}`)}><ArrowLeft className="h-4 w-4" /></Button>
-              <div><h1 className="font-semibold text-sm">{topicFilter || section.title}</h1><p className="text-xs text-muted-foreground">{topicFilter ? `${section.title} · Chapter ${sectionIndex + 1}` : `Chapter ${sectionIndex + 1} of ${totalSections}`}</p></div>
+        <div className="border-b border-border bg-white px-4 sm:px-6 py-3">
+          <div className="max-w-7xl mx-auto space-y-2">
+            {/* Row 1: back + title + action buttons */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <Button variant="ghost" size="sm" className="shrink-0 px-2" onClick={() => router.push(`/roadmap/${roadmapId}`)}><ArrowLeft className="h-4 w-4" /></Button>
+                <div className="min-w-0">
+                  <h1 className="font-semibold text-sm truncate">{topicFilter || section.title}</h1>
+                  <p className="text-xs text-muted-foreground hidden sm:block">{topicFilter ? `${section.title} · Ch. ${sectionIndex + 1}` : `Chapter ${sectionIndex + 1} of ${totalSections}`}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button variant="ghost" size="sm" className="px-2 sm:px-3" onClick={() => setChatOpen(!chatOpen)}>
+                  <MessageSquare className="h-4 w-4" /><span className="hidden sm:inline ml-1">Tutor</span>
+                </Button>
+                <Button size="sm" onClick={markComplete} disabled={completing} className="bg-emerald-600 hover:bg-emerald-700 px-2 sm:px-3">
+                  {completing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle className="h-4 w-4" /><span className="hidden sm:inline ml-1">Complete</span></>}
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
+            {/* Row 2: horizontally scrollable tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-hide">
               {milestoneItems.map((m) => (
                 <button key={m.id} onClick={() => m.id === "quiz" ? router.push(`/quiz/${roadmapId}/${sectionIndex}`) : setActiveTab(m.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === m.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap shrink-0 ${activeTab === m.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
                   <m.icon className="h-3.5 w-3.5" />{m.label}
                 </button>
               ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setChatOpen(!chatOpen)}><MessageSquare className="h-4 w-4 mr-1" />Tutor</Button>
-              <Button size="sm" onClick={markComplete} disabled={completing} className="bg-emerald-600 hover:bg-emerald-700">
-                {completing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle className="h-4 w-4 mr-1" />Complete</>}
-              </Button>
             </div>
           </div>
         </div>
@@ -378,9 +387,9 @@ export default function LearnPage() {
             </div>
           </div>
 
-          {/* Chat panel */}
+          {/* Chat panel — full screen on mobile, side panel on desktop */}
           {chatOpen && (
-            <div className="w-96 border-l border-border bg-white flex flex-col overflow-hidden">
+            <div className="fixed inset-0 z-40 bg-white flex flex-col sm:relative sm:inset-auto sm:z-auto sm:w-96 sm:border-l sm:border-border overflow-hidden">
               <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"><MessageSquare className="h-4 w-4 text-primary" /></div>
@@ -423,11 +432,11 @@ export default function LearnPage() {
         </div>
 
         {/* Bottom nav */}
-        <div className="border-t border-border bg-white px-6 py-2.5">
+        <div className="border-t border-border bg-white px-4 sm:px-6 py-2.5">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Button variant="ghost" size="sm" disabled={sectionIndex === 0} onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex - 1}`)}><ChevronLeft className="h-4 w-4 mr-1" />Previous</Button>
-            <div className="flex gap-1.5">{Array.from({ length: totalSections }).map((_, i) => (<div key={i} className={`h-1.5 rounded-full transition-all cursor-pointer ${i === sectionIndex ? "w-6 bg-primary" : "w-1.5 bg-gray-200"}`} onClick={() => router.push(`/learn/${roadmapId}/${i}`)} />))}</div>
-            <Button variant="ghost" size="sm" disabled={sectionIndex >= totalSections - 1} onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex + 1}`)}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+            <Button variant="ghost" size="sm" disabled={sectionIndex === 0} onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex - 1}`)}><ChevronLeft className="h-4 w-4" /><span className="hidden sm:inline ml-1">Previous</span></Button>
+            <div className="flex gap-1">{Array.from({ length: totalSections }).map((_, i) => (<div key={i} className={`h-1.5 rounded-full transition-all cursor-pointer ${i === sectionIndex ? "w-5 bg-primary" : "w-1.5 bg-gray-200"}`} onClick={() => router.push(`/learn/${roadmapId}/${i}`)} />))}</div>
+            <Button variant="ghost" size="sm" disabled={sectionIndex >= totalSections - 1} onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex + 1}`)}><span className="hidden sm:inline mr-1">Next</span><ChevronRight className="h-4 w-4" /></Button>
           </div>
         </div>
       </div>

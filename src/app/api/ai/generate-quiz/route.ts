@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import groq, { AI_MODEL } from "@/lib/groq";
+import groq, { SMART_MODEL, extractJsonArray } from "@/lib/groq";
 import { generateQuizPrompt } from "@/lib/prompts/quiz";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,18 +29,17 @@ export async function POST(request: Request) {
     const prompt = generateQuizPrompt(sectionTitle, topics, certification, difficulty);
 
     const completion = await groq.chat.completions.create({
-      model: AI_MODEL,
+      model: SMART_MODEL,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 4000,
+      temperature: 0.6,
+      max_tokens: 6000,
     });
 
     const content = completion.choices[0]?.message?.content || "[]";
 
-    let questions;
+    let questions: unknown[];
     try {
-      const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      questions = JSON.parse(jsonStr);
+      questions = extractJsonArray(content);
     } catch {
       questions = [];
     }
