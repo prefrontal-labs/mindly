@@ -93,7 +93,7 @@ export default function InterviewPage() {
     return (
       <>
         <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-muted-foreground mb-4">
               <Sparkles className="h-4 w-4 text-primary" />
@@ -162,7 +162,7 @@ export default function InterviewPage() {
   return (
     <>
       <Navbar />
-      <div className="max-w-3xl mx-auto px-6 py-24">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

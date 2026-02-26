@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getCertification } from "@/lib/certifications";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, ArrowRight, GraduationCap } from "lucide-react";
+import { Sparkles, Loader2, ArrowRight, GraduationCap, AlertCircle } from "lucide-react";
 import Navbar from "@/components/layout/navbar";
 import { toast } from "sonner";
 
@@ -38,8 +38,23 @@ function GenerateRoadmapContent() {
   const cert = getCertification(certId);
   const [selectedLevel, setSelectedLevel] = useState<string>("");
   const [generating, setGenerating] = useState(false);
+  const [existingRoadmapId, setExistingRoadmapId] = useState<string | null>(null);
+  const [checking, setChecking] = useState(true);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    async function check() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setChecking(false); return; }
+      const { data } = await supabase
+        .from("roadmaps").select("id")
+        .eq("user_id", user.id).eq("certification_id", certId).maybeSingle();
+      if (data) setExistingRoadmapId(data.id);
+      setChecking(false);
+    }
+    check();
+  }, [certId, supabase]);
 
   async function handleGenerate() {
     if (!selectedLevel) {
@@ -91,10 +106,79 @@ function GenerateRoadmapContent() {
     }
   }
 
+  if (checking) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </>
+    );
+  }
+
+  if (existingRoadmapId) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-3xl mx-auto px-6 py-24">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-muted-foreground mb-4">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Roadmap Generator
+            </div>
+            <h1 className="text-3xl font-bold mb-2">
+              You Already Have a <span className="gradient-text">Roadmap</span>
+            </h1>
+            <p className="text-muted-foreground">
+              You&apos;ve already generated a learning path for {cert?.name || "this certification"}.
+            </p>
+          </div>
+
+          {cert && (
+            <Card className="bg-card border-border mb-6">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${cert.color} flex items-center justify-center text-2xl`}>
+                    {cert.icon}
+                  </div>
+                  <div>
+                    <CardTitle>{cert.name}</CardTitle>
+                    <Badge variant="outline">{cert.code}</Badge>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          )}
+
+          <Card className="bg-amber-50 border-amber-200 mb-6">
+            <CardContent className="flex items-start gap-3 py-4">
+              <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-800">One roadmap per certification</p>
+                <p className="text-sm text-amber-700 mt-0.5">
+                  Each certification supports one personalized roadmap. View your existing roadmap to continue learning.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button
+            onClick={() => router.push(`/roadmap/${existingRoadmapId}`)}
+            className="w-full bg-primary hover:bg-primary/90 py-6 text-lg"
+          >
+            View My Roadmap
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
-      <div className="max-w-3xl mx-auto px-6 py-24">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-muted-foreground mb-4">
             <Sparkles className="h-4 w-4 text-primary" />

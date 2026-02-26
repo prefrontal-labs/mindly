@@ -95,7 +95,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Welcome */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -247,36 +247,46 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Start New Certification */}
+      {/* Certifications */}
       <div>
         <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          Start a New Path
+          Certification Paths
         </h2>
         <div className="grid md:grid-cols-3 gap-3">
-          {certifications.map((cert) => (
-            <Card
-              key={cert.id}
-              className="border-border hover:border-primary/30 transition-all cursor-pointer group"
-              onClick={() => router.push(`/roadmap/generate?cert=${cert.id}`)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${cert.color} flex items-center justify-center text-xl`}>
-                    {cert.icon}
+          {certifications.map((cert) => {
+            const existing = roadmaps.find((r) => r.certification_id === cert.id);
+            return (
+              <Card
+                key={cert.id}
+                className="border-border hover:border-primary/30 transition-all cursor-pointer group"
+                onClick={() => router.push(existing ? `/roadmap/${existing.id}` : `/roadmap/generate?cert=${cert.id}`)}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${cert.color} flex items-center justify-center text-xl`}>
+                      {cert.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-sm">{cert.name}</h3>
+                      <Badge variant="outline" className="text-xs mt-0.5">{cert.code}</Badge>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-sm">{cert.name}</h3>
-                    <Badge variant="outline" className="text-xs mt-0.5">{cert.code}</Badge>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{cert.description}</p>
-                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  Generate Roadmap <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{cert.description}</p>
+                  {existing ? (
+                    <Button size="sm" className="w-full bg-primary hover:bg-primary/90">
+                      <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                      View Roadmap
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      Generate Roadmap <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

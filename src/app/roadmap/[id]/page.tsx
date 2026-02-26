@@ -114,13 +114,12 @@ export default function RoadmapPage() {
   }
 
   function getChapterState(index: number): ChapterState {
+    // Check lock first — previous chapter must be completed to unlock this one
+    if (index > 0 && getSectionStatus(index - 1) !== "completed") return "locked";
     const status = getSectionStatus(index);
     if (status === "completed") return "completed";
     if (status === "in_progress") return "in_progress";
-    if (index === 0) return "available";
-    const prevStatus = getSectionStatus(index - 1);
-    if (prevStatus === "completed") return "available";
-    return "locked";
+    return "available";
   }
 
   const totalHours = sections.reduce(
@@ -142,7 +141,7 @@ export default function RoadmapPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-[#f0f9ff] pt-20 pb-16">
-        <div className="max-w-5xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
           {/* Header */}
           <div className="mb-10">
             <div className="flex items-start gap-4 mb-6">

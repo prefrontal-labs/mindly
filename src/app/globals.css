@@ -183,6 +183,15 @@
 /* Smooth scroll */
 html { scroll-behavior: smooth; }
 
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Pulse animation for CTA */
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }

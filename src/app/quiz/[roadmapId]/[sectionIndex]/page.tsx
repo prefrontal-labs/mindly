@@ -164,7 +164,7 @@ export default function QuizPage() {
     return (
       <>
         <Navbar />
-        <div className="max-w-2xl mx-auto px-6 py-24">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <Card className="bg-card border-border text-center">
             <CardContent className="py-12">
               <div className="text-6xl mb-4">
@@ -218,7 +218,7 @@ export default function QuizPage() {
   return (
     <>
       <Navbar />
-      <div className="max-w-3xl mx-auto px-6 py-24">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">

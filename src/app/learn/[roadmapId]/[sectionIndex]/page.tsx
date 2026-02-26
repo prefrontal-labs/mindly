@@ -5,7 +5,6 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getCertification } from "@/lib/certifications";
 import Navbar from "@/components/layout/navbar";
-import ProjectSelector from "@/components/projects/project-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2, BookOpen, MessageSquare, Send, CheckCircle,
   ArrowLeft, ArrowRight, Target, X, Lightbulb, Layers,
-  Zap, ChevronLeft, ChevronRight, Code2,
+  Zap, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import type { Roadmap, RoadmapSection, ChatMessage } from "@/types";
@@ -24,13 +23,12 @@ interface Concept { title: string; explanation: string; key_points: string[]; re
 interface Scenario { title: string; situation: string; question: string; options: string[]; correct_index: number; explanation: string; key_concepts: string[]; }
 interface Flashcard { front: string; back: string; }
 interface LessonData { overview: string; concepts: Concept[]; scenarios: Scenario[]; flashcards: Flashcard[]; }
-type Tab = "learn" | "flashcards" | "scenario" | "projects" | "quiz";
+type Tab = "learn" | "flashcards" | "scenario" | "quiz";
 
 const milestoneItems: { id: Tab; label: string; icon: typeof BookOpen }[] = [
   { id: "learn", label: "Learn", icon: BookOpen },
   { id: "flashcards", label: "Flashcards", icon: Layers },
   { id: "scenario", label: "Scenario", icon: Lightbulb },
-  { id: "projects", label: "Projects", icon: Code2 },
   { id: "quiz", label: "Quiz", icon: Target },
 ];
 
@@ -117,16 +115,20 @@ export default function LearnPage() {
 
   async function markComplete() {
     setCompleting(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from("section_progress").upsert(
-      { user_id: user.id, roadmap_id: roadmapId, section_index: sectionIndex, status: "completed", completed_at: new Date().toISOString() },
-      { onConflict: "user_id,roadmap_id,section_index" }
-    );
-    toast.success("Section completed!");
-    setCompleting(false);
-    if (sectionIndex < totalSections - 1) router.push(`/learn/${roadmapId}/${sectionIndex + 1}`);
-    else router.push(`/roadmap/${roadmapId}`);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await supabase.from("section_progress").upsert(
+        { user_id: user.id, roadmap_id: roadmapId, section_index: sectionIndex, status: "completed", completed_at: new Date().toISOString() },
+        { onConflict: "user_id,roadmap_id,section_index" }
+      );
+      if (error) throw new Error(error.message);
+      toast.success(sectionIndex < totalSections - 1 ? "Chapter complete! Next chapter unlocked." : "All chapters complete!");
+      router.push(`/roadmap/${roadmapId}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to mark complete");
+      setCompleting(false);
+    }
   }
 
   function toggleFlashcard(i: number) {
@@ -171,11 +173,11 @@ export default function LearnPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <Button variant="ghost" size="sm" className="px-2 sm:px-3" onClick={() => setChatOpen(!chatOpen)}>
-                  <MessageSquare className="h-4 w-4" /><span className="hidden sm:inline ml-1">Tutor</span>
+                <Button variant="ghost" size="sm" className="px-2" onClick={() => setChatOpen(!chatOpen)}>
+                  <MessageSquare className="h-4 w-4" />
                 </Button>
-                <Button size="sm" onClick={markComplete} disabled={completing} className="bg-emerald-600 hover:bg-emerald-700 px-2 sm:px-3">
-                  {completing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle className="h-4 w-4" /><span className="hidden sm:inline ml-1">Complete</span></>}
+                <Button size="sm" onClick={markComplete} disabled={completing} className="bg-emerald-600 hover:bg-emerald-700 text-xs px-3">
+                  {completing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle className="h-3.5 w-3.5 mr-1" />Mark Complete</>}
                 </Button>
               </div>
             </div>
@@ -193,7 +195,7 @@ export default function LearnPage() {
 
         <div className="flex-1 flex overflow-hidden">
           {/* Main */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             <div className="max-w-4xl mx-auto">
 
               {/* LEARN */}
@@ -376,13 +378,8 @@ export default function LearnPage() {
                       </Card>
                     );
                   })}
-                  <div className="text-center pt-2"><Button variant="outline" onClick={() => setActiveTab("projects")}>Continue to Projects <ArrowRight className="h-4 w-4 ml-2" /></Button></div>
+                  <div className="text-center pt-2"><Button variant="outline" onClick={() => router.push(`/quiz/${roadmapId}/${sectionIndex}`)}>Take Quiz <ArrowRight className="h-4 w-4 ml-2" /></Button></div>
                 </div>
-              )}
-
-              {/* PROJECTS */}
-              {activeTab === "projects" && (
-                <ProjectSelector roadmapId={roadmapId} sectionIndex={sectionIndex} />
               )}
             </div>
           </div>
