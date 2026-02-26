@@ -107,6 +107,15 @@ export default function LearnPage() {
   async function markInProgress(rm: Roadmap) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+    // Never overwrite a completed status — revisiting a chapter must not break the chain
+    const { data: existing } = await supabase
+      .from("section_progress")
+      .select("status")
+      .eq("user_id", user.id)
+      .eq("roadmap_id", rm.id)
+      .eq("section_index", sectionIndex)
+      .maybeSingle();
+    if (existing?.status === "completed") return;
     await supabase.from("section_progress").upsert(
       { user_id: user.id, roadmap_id: rm.id, section_index: sectionIndex, status: "in_progress" },
       { onConflict: "user_id,roadmap_id,section_index" }
@@ -176,9 +185,15 @@ export default function LearnPage() {
                 <Button variant="ghost" size="sm" className="px-2" onClick={() => setChatOpen(!chatOpen)}>
                   <MessageSquare className="h-4 w-4" />
                 </Button>
-                <Button size="sm" onClick={markComplete} disabled={completing} className="bg-emerald-600 hover:bg-emerald-700 text-xs px-3">
-                  {completing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle className="h-3.5 w-3.5 mr-1" />Mark Complete</>}
-                </Button>
+                {topicFilter ? (
+                  <Button size="sm" variant="outline" className="text-xs px-3" onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex}`)}>
+                    <ArrowLeft className="h-3.5 w-3.5 mr-1" />Full Chapter
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={markComplete} disabled={completing} className="bg-emerald-600 hover:bg-emerald-700 text-xs px-3">
+                    {completing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle className="h-3.5 w-3.5 mr-1" />Mark Complete</>}
+                  </Button>
+                )}
               </div>
             </div>
             {/* Row 2: horizontally scrollable tabs */}
