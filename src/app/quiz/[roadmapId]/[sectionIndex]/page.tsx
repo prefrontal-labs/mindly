@@ -217,7 +217,26 @@ export default function QuizPage() {
   }
 
   const q = questions[currentQuestion];
-  if (!q) return null;
+  if (!q) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+          <p className="text-muted-foreground">No quiz questions available.</p>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => section && roadmap && generateQuiz(section, roadmap, true)}>
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+            <Button variant="ghost" onClick={() => router.push(`/learn/${roadmapId}/${sectionIndex}`)}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Lesson
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

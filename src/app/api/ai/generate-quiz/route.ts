@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { groqChat, SMART_MODEL, extractJsonArray } from "@/lib/groq";
+import { groqChat, QUIZ_MODEL, extractJsonArray } from "@/lib/groq";
 import { generateQuizPrompt } from "@/lib/prompts/quiz";
 
 export const maxDuration = 60;
@@ -11,10 +11,10 @@ export async function POST(request: Request) {
     const prompt = generateQuizPrompt(sectionTitle, topics, certification, difficulty);
 
     const content = await groqChat({
-      model: SMART_MODEL,
+      model: QUIZ_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
-      max_tokens: 6000,
+      max_tokens: 8000,
       ttl: skipCache ? 0 : 86400, // 24h, bypass on explicit retry
     });
 
