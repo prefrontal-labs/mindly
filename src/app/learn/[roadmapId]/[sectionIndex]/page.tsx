@@ -65,11 +65,18 @@ export default function LearnPage() {
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
-      const { data } = await supabase.from("roadmaps").select("*").eq("id", roadmapId).single();
-      if (data && !controller.signal.aborted) {
+      try {
+        const { data, error } = await supabase.from("roadmaps").select("*").eq("id", roadmapId).maybeSingle();
+        if (error) console.error("[learn] roadmap fetch error:", error.message);
+        if (!data || controller.signal.aborted) { setLoading(false); return; }
         setRoadmap(data);
         const sec = data.sections?.[sectionIndex];
-        if (sec) { await generateLesson(sec, data, controller.signal); await markInProgress(data); }
+        if (!sec) { setLoading(false); return; }
+        await generateLesson(sec, data, controller.signal);
+        await markInProgress(data);
+      } catch (e) {
+        console.error("[learn] load error:", e);
+        setLoading(false);
       }
     }
     load();
@@ -80,7 +87,6 @@ export default function LearnPage() {
     setLoading(true);
     try {
       const c = getCertification(rm.certification_id);
-      // If a specific topic is selected, generate content for just that topic
       const topics = topicFilter ? [topicFilter] : sec.topics;
       const title = topicFilter || sec.title;
       const res = await fetch("/api/ai/generate-lesson", {
@@ -89,16 +95,20 @@ export default function LearnPage() {
           sectionTitle: title,
           topics,
           certification: c?.name || "Agentic AI Fundamentals",
-          roadmapId: rm.id,
-          sectionIndex,
           topicFilter: topicFilter || undefined,
         }),
         signal,
       });
       const data = await res.json();
-      setLesson(data.lesson);
+      if (data.error || !data.lesson) {
+        console.error("[learn] lesson API error:", data.error);
+        toast.error("Failed to generate lesson — please try again");
+      } else {
+        setLesson(data.lesson);
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
+      console.error("[learn] generateLesson error:", err);
       toast.error("Failed to load lesson");
     }
     setLoading(false);
@@ -162,8 +172,12 @@ export default function LearnPage() {
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
 
-  if (loading || !roadmap || !section) {
+  if (loading) {
     return (<><Navbar /><div className="min-h-screen flex flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-primary" /><p className="text-muted-foreground">AI is preparing your lesson...</p></div></>);
+  }
+
+  if (!roadmap || !section) {
+    return (<><Navbar /><div className="min-h-screen flex flex-col items-center justify-center gap-3"><p className="text-muted-foreground">Chapter not found.</p><Button variant="outline" onClick={() => router.back()}>Go Back</Button></div></>);
   }
 
   return (
@@ -212,6 +226,14 @@ export default function LearnPage() {
           {/* Main */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             <div className="max-w-4xl mx-auto">
+
+              {/* LEARN — error / retry state */}
+              {activeTab === "learn" && !lesson && (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <p className="text-muted-foreground text-sm">Failed to load lesson content.</p>
+                  <Button variant="outline" onClick={() => section && generateLesson(section, roadmap)}>Retry</Button>
+                </div>
+              )}
 
               {/* LEARN */}
               {activeTab === "learn" && lesson && (

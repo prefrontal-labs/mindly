@@ -45,18 +45,22 @@ export default function QuizPage() {
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
-      const { data } = await supabase
-        .from("roadmaps")
-        .select("*")
-        .eq("id", roadmapId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("roadmaps")
+          .select("*")
+          .eq("id", roadmapId)
+          .maybeSingle();
 
-      if (data && !controller.signal.aborted) {
+        if (error) console.error("[quiz] roadmap fetch error:", error.message);
+        if (!data || controller.signal.aborted) { setLoading(false); return; }
         setRoadmap(data);
         const sec = data.sections?.[sectionIndex];
-        if (sec) {
-          await generateQuiz(sec, data, false, controller.signal);
-        }
+        if (!sec) { setLoading(false); return; }
+        await generateQuiz(sec, data, false, controller.signal);
+      } catch (e) {
+        console.error("[quiz] load error:", e);
+        setLoading(false);
       }
     }
     load();

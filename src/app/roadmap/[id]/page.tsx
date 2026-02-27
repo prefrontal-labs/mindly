@@ -48,7 +48,7 @@ export default function RoadmapPage() {
         .from("roadmaps")
         .select("*")
         .eq("id", params.id)
-        .single();
+        .maybeSingle();
 
       if (roadmapData) {
         setRoadmap(roadmapData);

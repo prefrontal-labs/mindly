@@ -50,8 +50,8 @@ export async function groqChat(options: GroqChatOptions): Promise<string> {
     try {
       const cached = await redis.get<string>(cacheKey);
       if (cached) return cached;
-    } catch {
-      // Redis unavailable — proceed to Groq
+    } catch (e) {
+      console.warn("[groqChat] Redis cache read failed:", (e as Error).message ?? e);
     }
   }
 
@@ -64,6 +64,7 @@ export async function groqChat(options: GroqChatOptions): Promise<string> {
     const counter = await redis.incr("groq:key_counter");
     startIndex = Number(counter) % keys.length;
   } catch {
+    // Redis unavailable — fall back to random key selection
     startIndex = Math.floor(Math.random() * keys.length);
   }
 
@@ -87,8 +88,8 @@ export async function groqChat(options: GroqChatOptions): Promise<string> {
       if (ttl > 0 && content && cacheKey) {
         try {
           await redis.set(cacheKey, content, { ex: ttl });
-        } catch {
-          // Cache write failure is non-fatal
+        } catch (e) {
+          console.warn("[groqChat] Redis cache write failed:", (e as Error).message ?? e);
         }
       }
 
@@ -98,9 +99,10 @@ export async function groqChat(options: GroqChatOptions): Promise<string> {
       const msg = err instanceof Error ? err.message : String(err);
       const isRateLimit = msg.includes("429") || msg.toLowerCase().includes("rate limit");
       if (isRateLimit && attempt < keys.length - 1) {
-        // rotate to next key
+        console.warn(`[groqChat] Key ${keyIndex} hit rate limit — rotating to next key`);
         continue;
       }
+      console.error(`[groqChat] Groq API error (key ${keyIndex}):`, msg);
       throw err;
     }
   }
@@ -112,21 +114,27 @@ export async function groqChat(options: GroqChatOptions): Promise<string> {
 // JSON extraction helpers
 // ---------------------------------------------------------------------------
 export function extractJsonArray(text: string): unknown[] {
+  // Try direct bracket extraction first
   const start = text.indexOf("[");
   const end   = text.lastIndexOf("]");
   if (start !== -1 && end !== -1 && end > start) {
     try { return JSON.parse(text.substring(start, end + 1)); } catch { /* fall through */ }
   }
+  // Strip markdown code fences and retry
   const stripped = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  return JSON.parse(stripped);
+  try { return JSON.parse(stripped); } catch { /* fall through */ }
+  throw new Error(`Could not parse JSON array from LLM response. Preview: ${text.substring(0, 120)}`);
 }
 
 export function extractJsonObject(text: string): Record<string, unknown> {
+  // Try direct brace extraction first
   const start = text.indexOf("{");
   const end   = text.lastIndexOf("}");
   if (start !== -1 && end !== -1 && end > start) {
     try { return JSON.parse(text.substring(start, end + 1)); } catch { /* fall through */ }
   }
+  // Strip markdown code fences and retry
   const stripped = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  return JSON.parse(stripped);
+  try { return JSON.parse(stripped); } catch { /* fall through */ }
+  throw new Error(`Could not parse JSON object from LLM response. Preview: ${text.substring(0, 120)}`);
 }
