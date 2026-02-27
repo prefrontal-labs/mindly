@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import groq, { SMART_MODEL, extractJsonArray } from "@/lib/groq";
+import { groqChat, SMART_MODEL, extractJsonArray } from "@/lib/groq";
 import { generateRoadmapPrompt } from "@/lib/prompts/roadmap";
+
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -8,14 +10,13 @@ export async function POST(request: Request) {
 
     const prompt = generateRoadmapPrompt(certification, experienceLevel);
 
-    const completion = await groq.chat.completions.create({
+    const content = await groqChat({
       model: SMART_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 5000,
+      ttl: 86400, // 24h — same cert+level produces structurally consistent roadmaps
     });
-
-    const content = completion.choices[0]?.message?.content || "[]";
 
     let roadmap;
     try {
@@ -27,10 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ roadmap });
   } catch (error) {
     console.error("Roadmap generation error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate roadmap" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to generate roadmap" }, { status: 500 });
   }
 }
 
@@ -50,13 +48,7 @@ function getDefaultRoadmap(level: string) {
   ];
 
   if (level === "beginner") {
-    sections.unshift({
-      title: "Getting Started with AI",
-      description: "Introduction to AI development environment and tools",
-      topics: ["Python Basics for AI", "Setting up Development Environment", "API Keys & Authentication", "First AI Application"],
-      estimated_hours: 3,
-      order: 0,
-    });
+    sections.unshift({ title: "Getting Started with AI", description: "Introduction to AI development environment and tools", topics: ["Python Basics for AI", "Setting up Development Environment", "API Keys & Authentication", "First AI Application"], estimated_hours: 3, order: 0 });
     sections.forEach((s, i) => (s.order = i + 1));
   }
 
