@@ -7,7 +7,7 @@ import { redis } from "./redis";
 // ---------------------------------------------------------------------------
 export const SMART_MODEL = "llama-3.3-70b-versatile";
 export const FAST_MODEL  = "llama-3.1-8b-instant";
-export const QUIZ_MODEL  = "moonshotai/kimi-k2-instruct-0905"; // 262k ctx — largest context window available
+export const QUIZ_MODEL  = "meta-llama/llama-4-scout-17b-16e-instruct"; // 131k ctx, 17B — fast + Llama 4 quality
 export const AI_MODEL    = SMART_MODEL; // legacy alias
 
 // ---------------------------------------------------------------------------
