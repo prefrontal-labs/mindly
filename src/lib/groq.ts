@@ -48,8 +48,10 @@ export async function groqChat(options: GroqChatOptions): Promise<string> {
     const fingerprint = messages.map((m) => m.content).join("|");
     cacheKey = `groq:${createHash("md5").update(`${model}:${fingerprint}`).digest("hex")}`;
     try {
-      const cached = await redis.get<string>(cacheKey);
-      if (cached) return cached;
+      const cached = await redis.get<unknown>(cacheKey);
+      if (cached !== null && cached !== undefined) {
+        return typeof cached === "string" ? cached : JSON.stringify(cached);
+      }
     } catch (e) {
       console.warn("[groqChat] Redis cache read failed:", (e as Error).message ?? e);
     }
