@@ -98,10 +98,11 @@ export async function groqChat(options: GroqChatOptions): Promise<string> {
       lastError = err;
       const msg = err instanceof Error ? err.message : String(err);
       const isRateLimit = msg.includes("429") || msg.toLowerCase().includes("rate limit");
-      if (isRateLimit && attempt < keys.length - 1) {
-        console.warn(`[groqChat] Key ${keyIndex} hit rate limit — rotating to next key`);
-        continue;
-      }
+      const isAuthError = msg.includes("401") || msg.toLowerCase().includes("invalid api key");
+      const shouldRotate = (isRateLimit || isAuthError) && attempt < keys.length - 1;
+      if (isRateLimit) console.warn(`[groqChat] Key ${keyIndex} hit rate limit — rotating`);
+      if (isAuthError) console.warn(`[groqChat] Key ${keyIndex} is invalid (401) — rotating`);
+      if (shouldRotate) continue;
       console.error(`[groqChat] Groq API error (key ${keyIndex}):`, msg);
       throw err;
     }
