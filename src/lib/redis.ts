@@ -27,7 +27,11 @@ export const redis = {
 
   async set(key: string, value: unknown, opts?: { ex?: number }): Promise<void> {
     if (!client) throw new Error("Redis not configured");
-    await client.set(key, value, opts ?? {});
+    if (opts?.ex) {
+      await client.set(key, value, { ex: opts.ex });
+    } else {
+      await client.set(key, value);
+    }
   },
 
   async incr(key: string): Promise<number> {
