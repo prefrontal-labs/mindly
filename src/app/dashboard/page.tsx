@@ -16,7 +16,6 @@ import {
   Sparkles,
   MessageSquare,
   Layers,
-  Loader2,
   PlayCircle,
   Flame,
   CheckCircle,
@@ -39,24 +38,74 @@ export default function DashboardPage() {
 
       setUserName(user.user_metadata?.full_name || user.email?.split("@")[0] || "Learner");
 
-      const [roadmapRes, progressRes, quizRes] = await Promise.all([
-        supabase.from("roadmaps").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("section_progress").select("*").eq("user_id", user.id),
-        supabase.from("quiz_attempts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      // Load critical data first — only columns actually used on this page
+      const [roadmapRes, progressRes] = await Promise.all([
+        supabase.from("roadmaps")
+          .select("id, certification_id, title, sections")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase.from("section_progress")
+          .select("status, roadmap_id, section_index")
+          .eq("user_id", user.id),
       ]);
 
-      if (roadmapRes.data) setRoadmaps(roadmapRes.data);
-      if (progressRes.data) setProgressData(progressRes.data);
-      if (quizRes.data) setQuizAttempts(quizRes.data);
-      setLoading(false);
+      if (roadmapRes.data) setRoadmaps(roadmapRes.data as Roadmap[]);
+      if (progressRes.data) setProgressData(progressRes.data as SectionProgress[]);
+      setLoading(false); // render the page now — quiz scores load in background
+
+      // Load quiz data after — only the 20 most recent, only columns needed
+      const quizRes = await supabase.from("quiz_attempts")
+        .select("id, score, roadmap_id, section_index")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (quizRes.data) setQuizAttempts(quizRes.data as QuizAttempt[]);
     }
     loadData();
   }, [supabase]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-pulse">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <div className="h-8 w-48 bg-muted rounded-lg mb-2" />
+            <div className="h-4 w-64 bg-muted rounded" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-xl border border-border p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-muted shrink-0" />
+              <div className="space-y-2 flex-1">
+                <div className="h-5 w-12 bg-muted rounded" />
+                <div className="h-3 w-20 bg-muted rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-xl border border-border p-6 mb-8">
+          <div className="h-5 w-32 bg-muted rounded mb-4" />
+          <div className="h-2 w-full bg-muted rounded mb-4" />
+          <div className="h-8 w-28 bg-muted rounded" />
+        </div>
+        <div className="grid md:grid-cols-3 gap-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="rounded-xl border border-border p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-11 w-11 rounded-xl bg-muted shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 w-32 bg-muted rounded" />
+                  <div className="h-3 w-16 bg-muted rounded" />
+                </div>
+              </div>
+              <div className="h-3 w-full bg-muted rounded mb-1" />
+              <div className="h-3 w-3/4 bg-muted rounded mb-4" />
+              <div className="h-8 w-full bg-muted rounded" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
