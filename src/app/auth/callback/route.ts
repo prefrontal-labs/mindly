@@ -10,7 +10,11 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // New Google OAuth users won't have 'role' in metadata — send them to onboarding
+      const { data: { user } } = await supabase.auth.getUser();
+      const hasOnboarded = !!user?.user_metadata?.role;
+      const destination = hasOnboarded ? next : "/onboarding";
+      return NextResponse.redirect(`${origin}${destination}`);
     }
   }
 
