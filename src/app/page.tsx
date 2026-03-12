@@ -13,6 +13,7 @@ import {
   Target,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { certifications } from "@/lib/certifications";
 
 const features = [
   { icon: Brain, title: "AI Roadmaps", desc: "Personalized learning paths", color: "bg-indigo-50 text-indigo-600" },
@@ -51,7 +52,7 @@ export default function LandingPage() {
               The smartest way to<br /><span className="gradient-text">master AI skills</span>
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-              AI-powered learning paths for Agentic AI & Generative AI. Interactive scenarios and real-world practice.
+              AI-powered learning paths for Agentic AI, Generative AI, Data Science & more. Interactive scenarios and real-world practice.
             </p>
             <Link href="/signup">
               <Button size="lg" className="text-base px-8 py-6 animate-pulse-glow">
@@ -59,10 +60,14 @@ export default function LandingPage() {
               </Button>
             </Link>
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">🤖</div><div className="text-sm font-semibold">Agentic AI</div><div className="text-xs text-muted-foreground mt-1">12 chapters</div></div>
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">✨</div><div className="text-sm font-semibold">Generative AI</div><div className="text-xs text-muted-foreground mt-1">10 chapters</div></div>
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card"><div className="text-3xl mb-2">🚀</div><div className="text-sm font-semibold">AI Agents</div><div className="text-xs text-muted-foreground mt-1">Advanced</div></div>
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-16 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
+            {certifications.map((cert) => (
+              <div key={cert.id} className="bg-white rounded-2xl p-5 shadow-sm border border-border text-center concept-card">
+                <div className="text-3xl mb-2">{cert.icon}</div>
+                <div className="text-sm font-semibold leading-tight">{cert.name}</div>
+                <div className="text-xs text-muted-foreground mt-1">{cert.code}</div>
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>
