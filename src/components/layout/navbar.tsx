@@ -19,6 +19,7 @@ import {
   MessageSquare,
   LogOut,
   Menu,
+  Settings,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -98,6 +99,10 @@ export default function Navbar() {
                   <Trophy className="mr-2 h-4 w-4" />
                   Progress
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/settings")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
@@ -142,7 +147,14 @@ export default function Navbar() {
                   ))}
                 </nav>
 
-                <div className="absolute bottom-6 left-4 right-4">
+                <div className="absolute bottom-6 left-4 right-4 flex flex-col gap-1">
+                  <button
+                    onClick={() => { router.push("/settings"); setMobileOpen(false); }}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors w-full text-left"
+                  >
+                    <Settings className="h-5 w-5 shrink-0" />
+                    Settings
+                  </button>
                   <button
                     onClick={() => { handleLogout(); setMobileOpen(false); }}
                     className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full text-left"
