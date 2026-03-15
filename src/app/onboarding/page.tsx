@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Loader2, Briefcase, GraduationCap, Code, Target, Clock, User } from "lucide-react";
+import { Sparkles, Loader2, Briefcase, GraduationCap, Code, Target, Clock, User, Building2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -17,6 +18,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
+  const [institute, setInstitute] = useState("");
   const [role, setRole] = useState<"student" | "professional" | "">("");
   const [programmingLevel, setProgrammingLevel] = useState(0);
   const [aiExperience, setAiExperience] = useState<"none" | "beginner" | "intermediate" | "advanced" | "">("");
@@ -38,6 +40,7 @@ export default function OnboardingPage() {
     try {
       const { error } = await supabase.auth.updateUser({
         data: {
+          institute,
           role,
           programming_level: programmingLevel,
           ai_experience: aiExperience,
@@ -75,6 +78,22 @@ export default function OnboardingPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Institute */}
+            <div className="space-y-2">
+              <Label htmlFor="institute" className="flex items-center gap-2"><Building2 className="h-4 w-4" />Institute / Company</Label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="institute"
+                  type="text"
+                  placeholder="MIT, Google, Self-employed..."
+                  value={institute}
+                  onChange={(e) => setInstitute(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
             {/* Question 1: Role */}
             <div className="space-y-3">

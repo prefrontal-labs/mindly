@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Mail, Lock, User, Loader2, Briefcase, GraduationCap, Code, Target, Clock } from "lucide-react";
+import { Sparkles, Mail, Lock, User, Loader2, Briefcase, GraduationCap, Code, Target, Clock, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
 function GoogleIcon() {
@@ -25,6 +25,7 @@ function GoogleIcon() {
 export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
+  const [institute, setInstitute] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,6 +65,7 @@ export default function SignupPage() {
         options: {
           data: {
             full_name: name,
+            institute,
             role,
             programming_level: programmingLevel,
             ai_experience: aiExperience,
@@ -143,6 +145,20 @@ export default function SignupPage() {
                     onChange={(e) => setName(e.target.value)}
                     className="pl-10"
                     required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="institute">Institute / Company</Label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="institute"
+                    type="text"
+                    placeholder="MIT, Google, Self-employed..."
+                    value={institute}
+                    onChange={(e) => setInstitute(e.target.value)}
+                    className="pl-10"
                   />
                 </div>
               </div>
