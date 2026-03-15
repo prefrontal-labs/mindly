@@ -38,7 +38,8 @@ export default function OnboardingPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
+      // Update auth metadata
+      const { data: { user }, error } = await supabase.auth.updateUser({
         data: {
           institute,
           role,
@@ -49,6 +50,23 @@ export default function OnboardingPage() {
         },
       });
       if (error) throw error;
+
+      // Sync to profiles table (Google OAuth users — trigger only fires at signup, not on updateUser)
+      if (user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            institute,
+            role,
+            programming_level: programmingLevel,
+            ai_experience: aiExperience,
+            learning_goal: learningGoal,
+            time_commitment: timeCommitment,
+          })
+          .eq("id", user.id);
+        if (profileError) throw profileError;
+      }
+
       toast.success("Profile saved! Welcome to Mindly.");
       router.push("/dashboard");
     } catch (err) {
